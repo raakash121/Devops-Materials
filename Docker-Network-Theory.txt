@@ -1,0 +1,340 @@
+
+
+Container are method of operating system vitrtualization that allow you to run application and 
+its dependancies in resource isolated process.
+
+Containers allows you to easily package an application code, configurations and dependancies into easy to use
+building blocks and that application can be deployed quickly and consistently regardless of deployment env
+
+To understand Containers We have to start with Linux Cgroup and Namspace.
+Linux Kernal features that create the walls between container and other processes running on the host.
+
+Linux Namespace - Wrap a set of system resources and present  them to a process to 
+make it look like they are dedicated to that process
+
+Linux CGroups - Governs the isolation and usage of system resources such as cpu and memory for 
+group of process.E.g. - If you have a application that takes up lot of cpu cycles 
+and memory such as scientific computing application you can put the application in a cgroup
+ to limit a CPU and memory usage.
+
+Namespaces deal with  resource isoloatoion for single process
+Cgroup manages resuoues for group of processes
+
+Diffe Conatnce Vs
+
+Contaiers are an abstraction at APP layer that packages code and dependacies together. 
+Cotain can run on same machine and shares kernel 
+
+
+WordPress Demo
+
+
+Contaier - Operating system 
+PAckage application code , dependencies 
+----------------------------------------------Docker Networking
+
+What is Docker Networking
+How Docker Networking works
+
+Communicate with same host or different host
+
+Docker uses many linux namespace technology for isolation. They are 
+user namepace
+Process namespace etc
+
+For Network isolation it uses linux network namespace technology
+Each docker container has its own network namspace which means it has own 
+ip address
+routing tables
+firewall rules
+
+Linux n/w space is very very basic container network. 
+How can we create linux n/w namspace and how can 
+different namespace talk with each other they can talk with each other.
+
+
+Actually Docker has abstraction about network.
+Container Network Model.
+3 Important Concept
+Sandbox - Contains configuration of container network stack.
+	It could be linux networkk namespace. 
+	Sandbox could contain many many endpoints from multiple netowrks
+Endpoint: Joins Sandbox to a network 
+Network: Collection of endpoints having connectivity in between them
+
+CNM :
+In ordre to implment  powerful n/w function there are some drivers
+
+IPAM drivers: is used for ip address managemnet
+Network driver : is Most important drivers
+
+libnetwork is an implementation for CNM and under this model there are many network drivers.
+
+By Defult there 3 Types of built-in drivers
+None:
+Bridge: 
+Overlay:
+
+There are also 3rd party plugins to implement some complicated network model.
+
+For Single host docker networking is based linux bridge and iptables.
+
+For Multi host Conatiner networking we will know how containers are located on diff docker hhost
+and communicate with each other.
+
+Solution for multi-host docker networking is
+Tunnel & Routing
+Tunnel(Layer 2 tunnel technology )
+	Docker Build-in overlay netowrk: VXLAN
+	OVS: VXLAN or GRE
+	Flannel: VXLAN or UDP
+	Weave: VXLAN or UDP
+Routing l(ayer 3 routing technology)
+	Calico: Layer3 routing based on BGP
+	Contiv: Layer3 routing based on BGP
+-----------------------------------------------------------------------------------------------	
+Linux Network namespace:
+
+How to Create Network namespace and how to list network namespace on host
+
+ip netns list
+ip netns add test1
+ip netns delete test1
+ip netns exec test1 ip a
+
+Communication with network namespace done via netowork interface.
+
+e.g eth0
+ip link
+ip link add veth-1 type veth peer name veth-2
+ip link
+
+ip link set veth-1 netns test1
+ip netns exec test1 ip link
+
+ip addr add 192.168.1.1/24 dev veth-2
+ip link set dev veth-2 up
+ip link
+
+ip netns exec test1 ip addr add 192.168.1.2/24 dev veth-1
+ip netns exec test1 ip link veth-1 up
+ip netns exec test1 ip link
+ip netns exec test1 ping 192.168.1.1
+
+----------------------------------------------------
+Bridge Driver:
+
+docker network ls
+docker network inspect <bridge id>
+ip link
+apt-get  install bridge-utils
+
+brctl show
+
+docker run -d --name test1 busybox sh -c "while true;do sleep 3600;done"
+docker run -d --name test2 busybox sh -c "while true;do sleep 3600;done"
+-----------------------------------------------------------------------------------
+docker network create -d bridge my-bridge
+docker netwoek inspect my-bridge
+brctl show
+docker run -d --name test1 --network my-bridge busybox sh -c "while true;do sleep 3600;done"
+brctl show
+ip a
+docker exec -it test1 /bin/sh
+----------------------------------------------
+docker run -d --name test1 busybox sh -c "while true;do sleep 3600;done"
+docker run -d --name test2 busybox sh -c "while true;do sleep 3600;done"
+
+docker ps
+brctl show
+docker netwoek inspect <bridge_id>
+docker exec -it test1 ping test2_ip
+docker exec -it test1 ping test2
+docker network create -d bridge --subnet 192.168.1.0/24 demo-bridge
+docker network inspect demo-bridge
+
+docker network connect demo-bridge test1 
+docker network inspect demo-bridge
+docker exec -it test1 ip a
+
+docker network connect demo-bridge test2
+docker network inspect demo-bridge
+docker exec -it test1 ping 192.168.1.3
+docker exec -it test1 ping test <<Worked>>
+
+DNS server will work for n/w created by ourself not the created by docker
+
+docker network disconnect demo-bridge test1
+docker network disconnect demo-bridge test2
+docker network inspect demo-bridge
+
+docker exec -it test1 ping test2
+docker run -d --name test3 --link test1 busybox sh -c "while true;do sleep 3600;done"
+docker exec -it test3 ping test1
+
+-----------------------------------------------Port Mapping------------------------
+
+docker run -d --name web nginx
+docker inspect web
+curl http://172.17.0.2:80
+
+docker run -d -p 80 --name test nginx
+docker ps
+curl http://127.0.0.1:32769
+docker stop test
+docker rm test
+docker run -d -p 80:80 --name test nginx
+docker ps
+-----------------------------------------docker host network driver------------
+
+Host Network: if we create a container in host n/w mode container will share the same network 
+nampace with docker host.
+
+docker network ls
+docker run -d --network <host_n/w-id> --name hostdemo nginx
+docker ps
+docker exec -it hostdemo  /bin/sh ip a
+
+All the intrefaces in container in container and host are same
+
+------------------------- Overlay Network---------------------------------
+Multi host networking. Means 2 conatainers located on diff host can communicate with each other.
+
+vxlan magic
+https://www.youtube.com/watch?v=Jqm_4TMmQz8
+
+Etcd: it is distributed key-value store. Will setup 2 node etcd cluster on 2 node docker host
+wget https://github.com/coreos/etcd/releases/download/v3.0.12/etcd-v3.0.12-linux-amd64.tar.gz
+
+
+------------Overlay VXLAN Packet Flow-------------------------------------------------
+
+VXLAN is a data layer encapsulation format that overlays layer  2 segments
+over layer 3 networks.
+It is defined as mac udp encapsulation that places container layer 2 frames 
+inside underlay IP/UDP
+header. 
+
+Underlay IP/UDP header provides transport betwen hosts on underlay network.
+
+Packet flow
+When container c1 wants to communictae c2
+
+Hosts are connected physically that called underlay network.
+
+1. c1 does dns lookup for c2 since both containers are on same overlay network the docker engine
+local dns server will resolve to it's overlay ip address.
+2.An overlay network is a layer 2 segment so c1 genertae an layer2 frame and 
+for this frame dest mac adress is c2 
+3.Frame is encapsuulated with vxlan header by the overlay n/w driver. 
+The distributed overlay control plane manages location and state of each 
+vxlan tunnel endpoint so he knows that c2 residece 
+on hostB at physical ip adress of eth0. That Ip adress becomes the dest  address of underlay ip 
+header.
+4. Once encpasulated packet is sent the physical n/w is responsible for routing or bridging 
+the vxlan packet to the correct host.
+The Packet arrives at eth0 interface of host B and is decapsulated by overlay n/w driver.
+Orignal layer 2 frame from c1 is passed to c2 eth0 interface upto listening new application.
+
+------------------------Docker Swarm--
+In real world there are multiple distributed application means application running on multiple host at the same time.
+
+If we have more than 1 docker host and although we have leanrn multi-host docker networking
+we know that diff conatiner could communicate with each other.But if we have doist application to deploy
+Before docker swarm we used interact each docker host seperately and using seperate docker CLI.
+It's very incovinient to deploy application on multi docker -host
+
+With Docker swarm 
+provded native cluserting capability to turn group of docker engine into single,virtual docker
+engine.You were never bother where your container is created.
+
+Docker swarm has classic cluster architecture.
+There are 2 kinds of nodes
+1.Manager - There can be > 1 manager. This is for HA
+2.Worker - Ordinary docker host node.Each docker host uses GRPC protocol to communicate with
+manager.
+
+There is internal distributed state store which store configuations for the cluster
+
+
+--------------------Swarm mode key Concepts--------------------------
+
+Node - Instance of docker engine/docker host participating in swarm.
+Production docker swarm cluster has multiple hosts.
+
+If you want to deploy application to swarm cluster submit service defination to manager node.
+Then manager node dispatches units of works /tasks to worker nodes.Worker node will save and execute the task.
+
+Service is a defination of tasks to execute on worker
+Load balancer
+Replication controller
+-------------------------Create Docker Swarm Cluster-----------------------
+To Create docker swarm manager
+ docker swarm init --advertise-addr 172.31.18.123
+
+ docker swarm join --token SWMTKN-1-44jq4mlu5doirelxr1q83vx77f7u0zhrsj7kabs6c70q9zu7fl-38xhvnvdj2uhgiqlkpyitwb0f 172.31.18.123:2377
+	
+ On Worker node
+ docker swarm join\
+
+docker node ls
+--------------------- Demo Create a service----------------------------
+docker node ls
+
+Createaing service is simmilar to creating a cluster.
+
+docker service create --name web -p 80:80/tcp nginx
+
+docker service ls
+
+docker service ps web
+
+docker service ps
+
+curl localhost:80
+
+-------------Load Balancing and scaling with docker swarm-------------------
+https://github.com/dockersamples/docker-swarm-visualizer
+
+docker service create \
+  --name=viz \
+  --publish=8080:8080/tcp \
+  --constraint=node.role==manager \
+  --mount=type=bind,src=/var/run/docker.sock,dst=/var/run/docker.sock \
+  manomarks/visualizer
+  
+  
+docker service rm web
+
+docker service create --replicas 1 --name helloworld --publish 80:8000 jwilder/whoami
+docker service ps helloworld
+
+curl 127.0.0.1
+Scale:	
+docker service scale helloworld=5
+
+docker service ls
+docker service ps helloworld
+
+Load Balacing:
+curl 127.0.0.1
+
+-------------------------Deploying app with docker compose v3 in docker swarm---------------
+https://docs.docker.com/compose/compose-file/
+docker stack deploy -c docker-compose-v3.yml flask-demo-app
+docker stack ls
+
+
+Docker Internals - https://docs.docker.com/engine/userguide/storagedriver/imagesandcontainers/
+
+
+If we have more than 
+-----------------------------Kubernetes------------------------------------------
+
+
+
+
+
+
+
+
