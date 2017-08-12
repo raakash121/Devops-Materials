@@ -1,0 +1,483 @@
+Chef
+- Resource
+- cookbook   >>>> can be related to single usage.
+- receipe
+- nodes
+- Roles    >>> can be collection of multiple cookbook.
+- environments
+- organization
+- runlist   (combination of receipe+ node) this defines the policy of entire environment.
+- 
+
+
+
+
+
+
+
+Chef client running on client side will pull the data from chef server and deines all the policy in client.
+
+
+
+
+create account in manage.chef.io and download starter kit.
+create 2v rhel vm
+do pass authentication for both (refer devops day2 txt)
+paswwd   change password   (vraj@2393) for both 
+sshd service restart
+sshd service status
+ extract starter kit and copy to node(client via winscp)
+mv that file to /opt
+
+run this in workstation 1
+curl -L http://www.chef.io/chef/install.sh | sudo bash
+
+
+
+[root@ip-172-31-31-253 opt]# cd chef-repo
+[root@ip-172-31-31-253 chef-repo]# ls -la
+total 8
+drwxr-xr-x. 5 root root   84 Jul 30 01:07 .
+drwxr-xr-x. 4 root root   35 Jul 30 01:13 ..
+drwxr-xr-x. 2 root root   41 Jul 30 01:06 .chef
+drwxr-xr-x. 3 root root   39 Jul 30 01:06 cookbooks
+-rw-r--r--. 1 root root  495 Jul 29 19:10 .gitignore
+-rw-r--r--. 1 root root 2341 Jul 29 19:10 README.md
+drwxr-xr-x. 2 root root   24 Jul 30 01:07 roles
+[root@ip-172-31-31-253 chef-repo]# cd ..
+[root@ip-172-31-31-253 opt]# cd chef-repo
+[root@ip-172-31-31-253 chef-repo]# ls -al
+total 8
+drwxr-xr-x. 5 root root   84 Jul 30 01:07 .
+drwxr-xr-x. 4 root root   35 Jul 30 01:13 ..
+drwxr-xr-x. 2 root root   41 Jul 30 01:06 .chef
+drwxr-xr-x. 3 root root   39 Jul 30 01:06 cookbooks
+-rw-r--r--. 1 root root  495 Jul 29 19:10 .gitignore
+-rw-r--r--. 1 root root 2341 Jul 29 19:10 README.md
+drwxr-xr-x. 2 root root   24 Jul 30 01:07 roles
+[root@ip-172-31-31-253 chef-repo]# ls .chef
+knife.rb  vrajesh.pem
+[root@ip-172-31-31-253 chef-repo]#
+
+[root@ip-172-31-31-253 .chef]# ls -la
+total 8
+drwxr-xr-x. 2 root root   41 Jul 30 01:06 .
+drwxr-xr-x. 5 root root   84 Jul 30 01:32 ..
+-rw-r--r--. 1 root root  413 Jul 29 19:10 knife.rb
+-rw-r--r--. 1 root root 1674 Jul 29 19:10 vrajesh.pem
+[root@ip-172-31-31-253 .chef]# cat knife.rb
+# See http://docs.chef.io/config_rb_knife.html for more information on knife configuration options
+
+current_dir = File.dirname(__FILE__)
+log_level                :info
+log_location             STDOUT
+node_name                "vrajesh"
+client_key               "#{current_dir}/vrajesh.pem"
+chef_server_url          "https://api.chef.io/organizations/vraj7"
+cookbook_path            ["#{current_dir}/../cookbooks"]
+[root@ip-172-31-31-253 .chef]#
+
+[root@ip-172-31-31-253 chef-repo]# knife --version
+Chef: 13.2.20
+[root@ip-172-31-31-253 chef-repo]#
+
+
+[root@ip-172-31-31-253 chef-repo]# knife client list
+ERROR: Server returned error 503 for https://api.chef.io/organizations/vraj7/clients, retrying 1/5 in 4s
+ERROR: Server returned error 503 for https://api.chef.io/organizations/vraj7/clients, retrying 2/5 in 8s
+ERROR: Server returned error 500 for https://api.chef.io/organizations/vraj7/clients, retrying 3/5 in 15s
+ERROR: Server returned error 500 for https://api.chef.io/organizations/vraj7/clients, retrying 4/5 in 18s
+ERROR: Server returned error 500 for https://api.chef.io/organizations/vraj7/clients, retrying 5/5 in 40s
+
+^C[root@ip-172-31-31-253 chef-repo]# knife help list     (always run in chef repo)
+
+
+from pdf page 157 practice from home)
+
+
+
+
+
+-------------
+curl -s https://omnitruck.chef.io/install.sh | sudo bash -s -- -P chefdk
+
+[root@ip-172-31-31-253 opt]# curl -s https://omnitruck.chef.io/install.sh | sudo bash -s -- -P chefdk
+
+
+[root@ip-172-31-31-253 opt]# chef generate cookbook apache
+
+Generating cookbook apache
+- Ensuring correct cookbook file content
+- Ensuring delivery configuration
+- Ensuring correct delivery build cookbook content
+
+Your cookbook is ready. Type `cd apache` to enter it.
+
+There are several commands you can run to get started locally developing and testing your cookbook.
+Type `delivery local --help` to see a full list.
+
+Why not start by writing a test? Tests for the default recipe are stored at:
+
+test/smoke/default/default_test.rb
+
+If you'd prefer to dive right in, the default recipe can be found at:
+
+recipes/default.rb
+
+
+
+
+go to 
+[root@ip-172-31-31-253 recipes]# pwd
+/opt/apache/recipes
+[root@ip-172-31-31-253 recipes]# ls -lrt
+total 4
+-rw-r--r--. 1 root root 97 Jul 30 01:55 default.rb
+[root@ip-172-31-31-253 recipes]# pwd
+/opt/apache/recipes
+[root@ip-172-31-31-253 recipes]# vi default.rb        <copy from pdf page 208)
+[root@ip-172-31-31-253 recipes]# cd ..
+[root@ip-172-31-31-253 apache]# ls -lrt
+
+
+[root@ip-172-31-31-253 apache]# mkdir files
+[root@ip-172-31-31-253 apache]# cd files
+[root@ip-172-31-31-253 files]# mkdir default
+[root@ip-172-31-31-253 files]# vi index.html             (copy from pdf page 209)
+[root@ip-172-31-31-253 files]# mv index.html /opt/apache/files/default/
+[root@ip-172-31-31-253 files]# ls -lrt
+[root@ip-172-31-31-253 files]# cd default
+[root@ip-172-31-31-253 default]# ls -lrt
+total 4
+-rw-r--r--. 1 root root 53 Jul 30 02:08 index.html
+[root@ip-172-31-31-253 default]# cd /opt
+[root@ip-172-31-31-253 opt]# ls -lrt
+total 0
+drwxr-xr-x. 5 root root 121 Jul 30 01:13 chef
+drwxr-xr-x. 5 root root  84 Jul 30 01:32 chef-repo
+drwxr-xr-x. 6 root root 135 Jul 30 01:54 chefdk
+drwxr-xr-x. 7 root root 166 Jul 30 02:07 apache
+[root@ip-172-31-31-253 opt]# cd
+[root@ip-172-31-31-253 ~]# cd chef-repo
+-bash: cd: chef-repo: No such file or directory
+[root@ip-172-31-31-253 ~]# cd /opt
+[root@ip-172-31-31-253 opt]# ls -lrt
+total 0
+drwxr-xr-x. 5 root root 121 Jul 30 01:13 chef
+drwxr-xr-x. 5 root root  84 Jul 30 01:32 chef-repo
+drwxr-xr-x. 6 root root 135 Jul 30 01:54 chefdk
+drwxr-xr-x. 7 root root 166 Jul 30 02:07 apache
+
+[root@ip-172-31-31-253 apache]# cd ..
+[root@ip-172-31-31-253 opt]# cd chef-repo/
+[root@ip-172-31-31-253 chef-repo]# ls -ltr
+total 4
+-rw-r--r--. 1 root root 2341 Jul 29 19:10 README.md
+drwxr-xr-x. 3 root root   39 Jul 30 01:06 cookbooks
+drwxr-xr-x. 2 root root   24 Jul 30 01:07 roles
+[root@ip-172-31-31-253 chef-repo]# cd cookbooks/
+[root@ip-172-31-31-253 cookbooks]# ls -ltr
+total 4
+-rw-r--r--. 1 root root 588 Jul 29 19:10 chefignore
+drwxr-xr-x. 6 root root  88 Jul 30 01:07 starter
+[root@ip-172-31-31-253 cookbooks]# mv /opt/apache/ .
+[root@ip-172-31-31-253 cookbooks]# ls -ltr
+total 4
+-rw-r--r--. 1 root root 588 Jul 29 19:10 chefignore
+drwxr-xr-x. 6 root root  88 Jul 30 01:07 starter
+drwxr-xr-x. 7 root root 166 Jul 30 02:07 apache
+[root@ip-172-31-31-253 cookbooks]#
+[root@ip-172-31-31-253 cookbooks]# cd ..
+[root@ip-172-31-31-253 chef-repo]# knife cookbook upload apache
+Uploading apache       [0.1.0]
+Uploaded 1 cookbook.
+[root@ip-172-31-31-253 chef-repo]#
+
+
+go to url login to chef account in policy apahce will be there.
+
+
+
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++bootstraping++++++++++++++++++++++
+go to node machine 
+sudo su -
+passwd ec2-user   >> change password here for ec2-user
+
+go to workstation 1
+run command
+
+knife bootstrap 13.59.118.139 --sudo -x ec2-user -P admin123 -N "node1"
+
+
+
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+[root@ip-172-31-31-253 chef-repo]# knife node run_list add node1 "recipe[apache]"
+node1:
+  run_list: recipe[apache]
+[root@ip-172-31-31-253 chef-repo]#
+
+
+go to url in account node there will be runlist 
+
+
+
+>>>>>>>>>>>>>>.
+[root@ip-172-31-31-253 chef-repo]# knife cookbook list
+apache   0.1.0
+[root@ip-172-31-31-253 chef-repo]# knife node show node1
+Node Name:   node1
+Environment: _default
+FQDN:        ip-172-31-23-190.us-east-2.compute.internal
+IP:          13.59.118.139
+Run List:    recipe[apache]
+Roles:
+Recipes:
+Platform:    redhat 7.3
+Tags:
+[root@ip-172-31-31-253 chef-repo]#
+>>>>>>>>>>>>>>>>>
+
+go to client side in putty and run follwing command
+
+[ec2-user@ip-172-31-23-190 opt]$ sudo su -
+Last login: Wed Aug  2 09:42:40 EDT 2017 on pts/1
+[root@ip-172-31-23-190 ~]# chef-client
+Starting Chef Client, version 13.2.20
+resolving cookbooks for run list: ["apache"]
+Synchronizing Cookbooks:
+  - apache (0.1.0)
+Installing Cookbook Gems:
+Compiling Cookbooks...
+Converging 3 resources
+Recipe: apache::default
+  * yum_package[httpd] action install
+    - install version 2.4.6-67.el7 of package httpd
+  * service[httpd] action enable
+    - enable service service[httpd]
+  * service[httpd] action start
+    - start service service[httpd]
+  * cookbook_file[/var/www/html/index.html] action create
+    - create new file /var/www/html/index.html
+    - update content in file /var/www/html/index.html from none to 87b467
+    --- /var/www/html/index.html        2017-08-05 01:04:23.206979943 -0400
+    +++ /var/www/html/.chef-index20170805-2391-1kl0yih.html     2017-08-05 01:04:23.205979955 -0400
+    @@ -1 +1,6 @@
+    +<html>
+    +<body>
+    +<h1>Hello, world!</h1>
+    +</body>
+    +</html>
+    - change mode from '' to '0644'
+    - restore selinux security context
+
+Running handlers:
+Running handlers complete
+Chef Client finished, 4/4 resources updated in 16 seconds
+>>>>>>>>>>>>>>>>>>>>>>
+
+[root@ip-172-31-23-190 ~]# netstat -tulpno | grep :80
+tcp6       0      0 :::80                   :::*                    LISTEN      2757/httpd           off (0.00/0/0)
+>>>>>>>>>>>>
+
+
+go to pdf 227
+
+........
+to check authentication go to client machine:
+sudo su -
+cd /etc/chef
+ls -lrt
+there is client.pem 
+
+
+>>>>>>>>>>>>
+go to workstation
+
+[root@ip-172-31-31-253 chef-repo]# knife node list
+node1
+[root@ip-172-31-31-253 chef-repo]# knife client list
+node1
+vraj7-validator
+
+go to client machine
+
+ohai | less
+
+
+pdf page 303
+
+in workstation
+cd chef-repo/cookbooks/apache/attributes/default.rb
+
+here create mkdir attributes in that create default.rb 
+and copy the command given on page 303
+
+do same in given in page 304,305
+
+
+[root@ip-172-31-31-253 chef-repo]# knife cookbook upload apache
+Uploading apache         [0.1.0]
+Uploaded 1 cookbook.
+[root@ip-172-31-31-253 chef-repo]#
+
+
+go in client machine run
+chef-client
+
+
+
+and then go to url with public ip of client:80
+
+
+>>>>>>>>>>>>>>>go to pdf page 321>>>>>>>>>>>>>>>>>>>
+
+
+[root@ip-172-31-31-253 cookbooks]# pwd
+/opt/chef-repo/cookbooks
+[root@ip-172-31-31-253 cookbooks]# chef generate cookbook motd
+Generating cookbook motd
+- Ensuring correct cookbook file content
+- Ensuring delivery configuration
+- Ensuring correct delivery build cookbook content
+
+Your cookbook is ready. Type `cd motd` to enter it.
+
+There are several commands you can run to get started locally developing and testing your cookbook.
+Type `delivery local --help` to see a full list.
+
+Why not start by writing a test? Tests for the default recipe are stored at:
+
+test/smoke/default/default_test.rb
+
+If you'd prefer to dive right in, the default recipe can be found at:
+
+recipes/default.rb
+
+[root@ip-172-31-31-253 cookbooks]# ls -lrt
+total 4
+-rw-r--r--. 1 root root 588 Jul 29 19:10 chefignore
+drwxr-xr-x. 6 root root  88 Jul 30 01:07 starter
+drwxr-xr-x. 8 root root 184 Aug  5 02:03 apache
+drwxr-xr-x. 6 root root 153 Aug  5 02:19 motd
+
+[root@ip-172-31-31-253 cookbooks]#
+
+pgafe 327 >>331,332 do from home...(326-349)assignments
+
+>>>>>>>>>>>>>>>>>>>>>>page 382 do change till here from 381-382>>>>>>>>>>>>
+then >>
+
+[root@ip-172-31-31-253 recipes]# pwd
+/opt/chef-repo/cookbooks/apache/recipes
+[root@ip-172-31-31-253 recipes]# ls -lrt
+total 0
+-rw-r--r--. 1 root root 0 Aug  6 00:55 default.rb
+[root@ip-172-31-31-253 recipes]#  >default.rb                              >>this will clean up the old default.rb and then copy new code from chefapachecode.txt
+
+[root@ip-172-31-31-253 recipes]# vi default.rb
+[root@ip-172-31-31-253 recipes]# cd ..
+[root@ip-172-31-31-253 apache]# ls -lrt
+total 16
+-rw-r--r--. 1 root root   54 Jul 30 01:55 README.md
+-rw-r--r--. 1 root root 1133 Jul 30 01:55 chefignore
+-rw-r--r--. 1 root root   77 Jul 30 01:55 Berksfile
+drwxr-xr-x. 3 root root   19 Jul 30 01:55 test
+drwxr-xr-x. 3 root root   40 Jul 30 01:55 spec
+drwxr-xr-x. 3 root root   21 Jul 30 02:11 files
+-rw-r--r--. 1 root root  752 Aug  6 00:21 metadata.rb
+drwxr-xr-x. 2 root root   24 Aug  6 00:26 attributes
+drwxr-xr-x. 2 root root   24 Aug  6 00:59 recipes
+[root@ip-172-31-31-253 apache]# mkdir templates
+[root@ip-172-31-31-253 apache]# ls -lrt
+total 16
+-rw-r--r--. 1 root root   54 Jul 30 01:55 README.md
+-rw-r--r--. 1 root root 1133 Jul 30 01:55 chefignore
+-rw-r--r--. 1 root root   77 Jul 30 01:55 Berksfile
+drwxr-xr-x. 3 root root   19 Jul 30 01:55 test
+drwxr-xr-x. 3 root root   40 Jul 30 01:55 spec
+drwxr-xr-x. 3 root root   21 Jul 30 02:11 files
+-rw-r--r--. 1 root root  752 Aug  6 00:21 metadata.rb
+drwxr-xr-x. 2 root root   24 Aug  6 00:26 attributes
+drwxr-xr-x. 2 root root   24 Aug  6 00:59 recipes
+drwxr-xr-x. 2 root root    6 Aug  6 00:59 templates
+[root@ip-172-31-31-253 apache]# cd templates
+[root@ip-172-31-31-253 templates]# pwd
+/opt/chef-repo/cookbooks/apache/templates
+[root@ip-172-31-31-253 templates]# vi custom.erb
+[root@ip-172-31-31-253 templates]# ls -lrt
+total 0
+[root@ip-172-31-31-253 templates]# mkdir default
+[root@ip-172-31-31-253 templates]# vi custom.erb
+[root@ip-172-31-31-253 templates]# ls -lrt
+total 4
+drwxr-xr-x. 2 root root   6 Aug  6 01:00 default
+-rw-r--r--. 1 root root 396 Aug  6 01:01 custom.erb
+[root@ip-172-31-31-253 templates]# mv custom.erb default/
+[root@ip-172-31-31-253 templates]# ls -lrt
+total 0
+drwxr-xr-x. 2 root root 24 Aug  6 01:01 default
+[root@ip-172-31-31-253 templates]# cd default
+[root@ip-172-31-31-253 default]# ls -lrt
+total 4
+-rw-r--r--. 1 root root 396 Aug  6 01:01 custom.erb
+[root@ip-172-31-31-253 default]# pwd
+/opt/chef-repo/cookbooks/apache/templates/default
+[root@ip-172-31-31-253 default]#
+
+refer chefapachecode for code in all .
+make custom and index in templates/default/
+
+
+[root@ip-172-31-31-253 chef-repo]# knife cookbook upload apache
+Uploading apache         [0.2.0]
+Uploaded 1 cookbook.
+[root@ip-172-31-31-253 chef-repo]# knife node run_list add node1 "recipe[apache]"
+node1:
+  run_list:
+    recipe[apache]
+    recipe[motd]
+[root@ip-172-31-31-253 chef-repo]#
+
+go to client node
+setenforce 0
+chef-client
+
+now if all is ok then
+
+localipofclient:80
+localipofclient:81
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>.
+
+pdf page 423
+>>>>>>>>>>>
+437-444 work assignment,519-530 work assignments(remove current list motd and pass it in available recipe in ui)
+
+>>>>>>>>>>>>>>>.
+pdf page 450 >>>>
+
+
+name "webserver"
+description "Web Server"
+run_list "recipe[apache]"
+default_attributes({
+  "apache" => {
+    "sites" => {
+     "admin" => {
+      "port" => 8000
+     }
+    }
+  }
+})
+
+
+
+
+
+>>>>>>>>>>>>>>>Chef Environments>>>>>>>>>>>>>>>>>>>
+
+page 550-557 do assignments
+
+
+
