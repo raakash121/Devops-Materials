@@ -1,0 +1,26 @@
+Puppet-Basics.pptx
+
+
+---------------------Puppet------------------------
+
+sudo rpm -ivh https://yum.puppetlabs.com/puppetlabs-release-el-7.noarch.rpm
+
+sudo yum install puppetserver
+
+---Install Puppet Agent
+
+sudo yum install puppet
+
+----------++++++++
+http://elatov.github.io/2016/07/upgrade-puppet-3x-to-4x
+
+-----------+++++++++++
+https://docs.puppet.com/puppet/4.9/architecture.html
+
++++++++++++++++
+
+https://docs.puppet.com/puppet/4.9/lang_reserved.html
+
++++++++++++++
+
+https://forge.puppet.com/
